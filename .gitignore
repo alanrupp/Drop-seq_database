@@ -1,0 +1,5 @@
+# raw data
+*.Rdata
+
+# shiny app info
+*.shiny_app.conf

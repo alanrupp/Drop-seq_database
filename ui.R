@@ -22,7 +22,7 @@ ui <-
                           column(width = 3, 
                                  selectInput("dataset", 
                                              "Dataset:", 
-                                             choices = data_names_)
+                                             choices = data_names)
                                  ),
                           column(width = 3, align = 'left', 
                                  style = 'margin-top: 25px;',
@@ -32,9 +32,7 @@ ui <-
                           ),
                         fluidRow(
                           column(width = 6,
-                                 plotOutput("umap")),
-                          column(width = 6,
-                                 plotOutput("heatmap"))
+                                 plotOutput("umap"))
                           )
                       )
                       ),
@@ -46,10 +44,17 @@ ui <-
                           column(width = 3, 
                                  selectizeInput("clusterID", 
                                                 "Cluster ID",
-                                                choices = NULL)),
-                          column(width = 3,
+                                                choices = NULL),
                                  sliderInput("num_genes", "Number of genes",
                                              min = 1, max = 16, value = 4)),
+                          column(width = 3,
+                                 selectizeInput("plottype_cluster", 
+                                                "Plot type",
+                                                choices = list("Violin" = "violin",
+                                                               "Boxplot" = "boxplot",
+                                                               "UMAP" = "umap")
+                                 )
+                          ),
                           column(width = 3, align = 'left', 
                                  style = 'margin-top: 25px;',
                                  actionButton("select_cluster", "Select", 
@@ -68,10 +73,18 @@ ui <-
                       fluidPage(
                         fluidRow(
                           column(width = 3, 
-                                 selectizeInput("genes", 
+                                 selectizeInput("gene", 
                                                 "Genes",
-                                                choices = genes,
+                                                choices = gene_list,
                                                 multiple = TRUE)),
+                          column(width = 3,
+                                 selectizeInput("plottype_gene", 
+                                                "Plot type",
+                                                choices = list("Violin" = "violin",
+                                                               "Boxplot" = "boxplot",
+                                                               "UMAP" = "umap")
+                                                )
+                                 ),
                           column(width = 3, align = 'left', 
                                  style = 'margin-top: 25px;',
                                  actionButton("select_genes", "Select", 
@@ -79,11 +92,7 @@ ui <-
                         )
                       ),
                       fluidRow(
-                        plotOutput("gene_umap", 
-                                   width = "100%")
-                      ),
-                      fluidRow(
-                        plotOutput("gene_vln",
+                        plotOutput("gene_plot",
                                    width = "100%")
                       ))
              )

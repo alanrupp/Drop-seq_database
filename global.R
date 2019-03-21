@@ -1,4 +1,6 @@
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(stringr)
 
 # - Grab markers -------------------------------------------------------------
 grab_markers <- function(markers_df, clst, n_genes) {
@@ -97,7 +99,7 @@ protein_coding <-
   .$gene_name
 
 # defaults
-cluster_list <- list(Clusters = seq(from = 0, to = 10))
+cluster_list <- list(Clusters = seq(10))
 gene_list <- list(Gene = read_csv("biotypes.csv") %>% .$gene_name)
 
 

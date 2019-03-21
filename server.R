@@ -1,8 +1,6 @@
 library(dplyr)
 library(ggplot2)
 library(shiny)
-library(DT)
-library(Seurat)
 
 # - Server function ----------------------------------------------------------
 server <- function(input, output, session) {

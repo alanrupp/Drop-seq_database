@@ -1,2 +1,2 @@
 # Drop-seq_database
-Shiny app for browsing Seurat Drop-seq data
+Shiny app for browsing Drop-seq data

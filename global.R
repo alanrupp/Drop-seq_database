@@ -3,6 +3,7 @@ library(ggplot2)
 library(stringr)
 library(readr)
 library(tidyr)
+library(purrr)
 
 # - Grab markers -------------------------------------------------------------
 grab_markers <- function(markers_df, clst, n_genes) {

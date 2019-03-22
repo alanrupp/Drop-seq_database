@@ -92,7 +92,7 @@ gene_plot <- function(mtx, genes, plot_type) {
 # - Read in data --------------------------------------------------------------
 data_files <- list.files("datasets", ".Rdata", full.names = TRUE)
 data_names <- str_extract(data_files, "(?<=\\/)(.+)(?=\\.Rdata)")
-data_names <- str_replace(data_names, "_", " ")
+data_names <- str_replace_all(data_names, "_", " ")
 
 
 # keep only protein_coding genes

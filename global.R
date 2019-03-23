@@ -60,16 +60,21 @@ gene_plot <- function(mtx, genes, plot_type) {
   if (plot_type == "umap") {
     plt <- ggplot(df, aes(x = UMAP1, y = UMAP2)) +
       geom_point(aes(color = counts), show.legend = FALSE, stroke = 0) +
-      scale_color_gradient(low = "gray90", high = "navyblue")
+      scale_color_gradient(low = "gray90", high = "navyblue") +
+      theme_bw() +
+      theme(panel.grid = element_blank())
   } else if (plot_type %in% c("violin", "boxplot")) {
     plt <- ggplot(df, aes(x = cluster, y = counts, fill = cluster)) +
       scale_y_continuous(expand = c(0, 0)) +
-      labs(y = "Counts", x = element_blank())
+      labs(y = "Counts", x = element_blank()) +
+      theme_bw() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+            panel.grid = element_blank())
     if (plot_type == "violin") {
       plt <- plt + 
         geom_violin(scale = "width", show.legend = FALSE) +
         geom_jitter(color = "black", stroke = 0, alpha = 0.5,
-                    show.legend = FALSE)
+                    show.legend = FALSE, height = 0)
     } else if (plot_type == "boxplot") {
       plt <- plt + 
         geom_boxplot(show.legend = FALSE)
@@ -80,12 +85,7 @@ gene_plot <- function(mtx, genes, plot_type) {
     plt <- plt + facet_wrap(~gene, scales = "free_y")
   }
 
-  # universal plot settings
-  universal_settings <- list(
-    theme_bw(),
-    theme(panel.grid = element_blank())
-  )
-  return(plt + universal_settings)
+  return(plt)
 }
 
 

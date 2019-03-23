@@ -22,7 +22,7 @@ server <- function(input, output, session) {
     # make genes and clusters lists for menus
     gene_list <- list(Genes = sort(unique(rownames(mtx))))
     #gene_list[["Genes"]] <- gene_list[["Genes"]][gene_list[["Genes"]] %in% protein_coding]
-    cluster_list <- list(Clusters = levels(clusters$cluster))
+    cluster_list <- list(Clusters = sort(unique(clusters$cluster)))
     
     updateSelectizeInput(session, "genes", 
                          choices = gene_list, 

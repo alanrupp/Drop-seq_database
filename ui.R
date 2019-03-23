@@ -44,7 +44,7 @@ ui <-
                           column(width = 3, 
                                  selectizeInput("clusterID", 
                                                 "Cluster ID",
-                                                choices = NULL),
+                                                choices = cluster_list),
                                  sliderInput("num_genes", "Number of genes",
                                              min = 1, max = 16, value = 4)),
                           column(width = 3,

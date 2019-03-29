@@ -93,16 +93,3 @@ gene_plot <- function(mtx, genes, plot_type) {
 data_files <- list.files("datasets", ".Rdata", full.names = TRUE)
 data_names <- str_extract(data_files, "(?<=\\/)(.+)(?=\\.Rdata)")
 data_names <- str_replace_all(data_names, "_", " ")
-
-
-# keep only protein_coding genes
-protein_coding <- 
-  read_csv("biotypes.csv") %>% 
-  filter(gene_biotype == "protein_coding") %>%
-  .$gene_name
-
-# defaults
-cluster_list <- list(Clusters = seq(10))
-gene_list <- list(Gene = read_csv("biotypes.csv") %>% .$gene_name)
-
-

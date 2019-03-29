@@ -42,7 +42,7 @@ ui <-
                       fluidPage(
                         fluidRow(
                           column(width = 3, 
-                                 selectizeInput("clusterID", 
+                                 selectizeInput("cluster", 
                                                 "Cluster ID",
                                                 choices = cluster_list),
                                  sliderInput("num_genes", "Number of genes",
@@ -73,7 +73,7 @@ ui <-
                       fluidPage(
                         fluidRow(
                           column(width = 3, 
-                                 selectizeInput("gene", 
+                                 selectizeInput("genes", 
                                                 "Genes",
                                                 choices = gene_list,
                                                 multiple = TRUE)),
@@ -92,8 +92,7 @@ ui <-
                         )
                       ),
                       fluidRow(
-                        plotOutput("gene_plot",
-                                   width = "100%")
+                        plotOutput("gene_plot")
                       ))
              )
   )

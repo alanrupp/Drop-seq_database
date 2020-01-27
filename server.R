@@ -2,6 +2,8 @@ library(dplyr)
 library(ggplot2)
 library(shiny)
 
+source("global.R")
+
 # - Server function ----------------------------------------------------------
 server <- function(input, output, session) {
   session$onSessionEnded(stopApp)
@@ -18,49 +20,40 @@ server <- function(input, output, session) {
     load(file = data_files[data_names == input$dataset], .GlobalEnv)
     progress$close()
     
-    
     # make genes and clusters lists for menus
     gene_list <- list(Genes = sort(unique(rownames(mtx))))
     cluster_list <- list(Clusters = sort(unique(clusters$cluster)))
     
     updateSelectizeInput(session, "genes", choices = gene_list)
     updateSelectizeInput(session, "cluster", choices = cluster_list)
-
-    # UMAP plot of clusters
-    output$umap <- renderPlot({
+    
+    # select a gene from the table to plot
+    row_id <- reactive({
+      if (is.null(input$gene_table_rows_selected)) {
+        1
+      } else (
+        input$gene_table_rows_selected
+      )
+    })
+    
+    markers_table <- reactive({
       
-      umap_clusters(mtx, clusters)
+      keep_markers(input$cluster, input$classes)
       
     })
     
-    
-    # - Tab 2 - plot top markers for each cluster
-    observeEvent(input$select_cluster, {
-      
-      marker_set <- grab_markers(markers, input$cluster, input$num_genes)
-      
-      # Violin plot of top markers by group
-      output$markers_plot <- renderPlot({
-        
-        gene_plot(mtx, marker_set, input$plottype_cluster)
-        
-      })
-      
-    })
+    # Plot outputs
+    output$clusters <- renderPlot({ umap_clusters() })
+    output$umap <- renderPlot({ umap_gene(markers_table()[row_id(), "gene"]) })
+    output$violin <- renderPlot({ violin_gene(markers_table()[row_id(), "gene"]) })
     
     
-    # - Tab 3 - Expression by gene of choice
-    observeEvent(input$select_genes, {
-      
-      # Plots of selected genes
-      output$gene_plot <- renderPlot({
-        
-        gene_plot(mtx, input$gene, input$plottype_gene)
-        
-      })
-      
-    })
-  
+    # Table output
+    output$gene_table <- renderDT({ markers_table() },
+                                  class = "display nowrap compact",
+                                  filter = "top",
+                                  server = TRUE,
+                                  selection = "single", 
+                                  escape = FALSE)
   })
-  
 }

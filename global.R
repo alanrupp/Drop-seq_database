@@ -3,93 +3,73 @@ library(ggplot2)
 library(stringr)
 library(readr)
 library(tidyr)
-library(purrr)
-
-# - Grab markers -------------------------------------------------------------
-grab_markers <- function(markers_df, clst, n_genes) {
-  mrkrs <- markers_df %>%
-    filter(cluster == clst) %>%
-    filter(p_val_adj < 0.05) %>%
-    arrange(desc(pct.1 - pct.2)) %>%
-    .$gene
-  if (n_genes > length(mrkrs)) {
-    mrkrs <- mrkrs
-  } else {
-    mrkrs <- mrkrs[1:n_genes]
-  }
-  return(mrkrs)
-}
 
 # - Plot clusters on UMAP ---------------------------------------------------
-umap_clusters <- function(mtx, clusters) {
+umap_clusters <- function() {
   df <- bind_cols(umap, clusters)
   cluster_centers <- df %>%
     group_by(cluster) %>%
-    summarize("UMAP1" = mean(UMAP1), "UMAP2" = mean(UMAP2))
-  plt <- ggplot(df, aes(x = UMAP1, y = UMAP2)) +
+    summarize("UMAP1" = median(UMAP1), "UMAP2" = median(UMAP2))
+  p <- ggplot(df, aes(x = UMAP1, y = UMAP2)) +
     geom_point(aes(color = cluster), show.legend = FALSE) +
     theme_bw() +
-    theme(panel.grid = element_blank())
-  plt <- plt + 
-    geom_text(data = cluster_centers, aes(label = cluster), show.legend = FALSE)
-  return(plt)
+    theme(panel.grid = element_blank()) +
+    geom_text(data = cluster_centers, aes(label = cluster), show.legend = FALSE) +
+    ggtitle("Clusters")
+  return(p)
 }
 
-# - Plot gene by cluster -----------------------------------------------------
-gene_plot <- function(mtx, genes, plot_type) {
-  if (length(genes) == 1) {
-    df <- mtx[genes, ] %>% as.data.frame() %>% set_names("counts")
-  } else {
-    df <- mtx[genes, ] %>% as.matrix() %>% t() %>% as.data.frame()
-  }
-  
-  # grab data for plots
-  if (plot_type == "umap") {
-    df <- bind_cols(df, umap)
-    if (length(genes) > 1) {
-      df <- gather(df, -starts_with("UMAP"), key = "gene", value = "counts")
-    }
-  } else if (plot_type %in% c("violin", "boxplot")) {
-    df$cluster <- clusters$cluster
-     if (length(genes) > 1) {
-       df <- gather(df, -cluster, key = "gene", value = "counts")
-     }
-  }
-  
-  # set up plots
-  if (plot_type == "umap") {
-    plt <- ggplot(df, aes(x = UMAP1, y = UMAP2)) +
-      geom_point(aes(color = counts), show.legend = FALSE, stroke = 0) +
-      scale_color_gradient(low = "gray90", high = "navyblue") +
-      theme_bw() +
-      theme(panel.grid = element_blank())
-  } else if (plot_type %in% c("violin", "boxplot")) {
-    plt <- ggplot(df, aes(x = cluster, y = counts, fill = cluster)) +
-      scale_y_continuous(expand = c(0, 0)) +
-      labs(y = "Counts", x = element_blank()) +
-      theme_bw() +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-            panel.grid = element_blank())
-    if (plot_type == "violin") {
-      plt <- plt + 
-        geom_violin(scale = "width", show.legend = FALSE) +
-        geom_jitter(color = "black", stroke = 0, alpha = 0.5,
-                    show.legend = FALSE, height = 0)
-    } else if (plot_type == "boxplot") {
-      plt <- plt + 
-        geom_boxplot(show.legend = FALSE)
-    }
-  }
-  
-  if (length(genes) > 1) {
-    plt <- plt + facet_wrap(~gene, scales = "free_y")
-  }
-
-  return(plt)
+# - Plot gene on UMAP ---------------------------------------------------------
+umap_gene <- function(gene) {
+  df <- data.frame("counts" = as.numeric(mtx[gene, ])) %>% bind_cols(., umap)
+  p <- ggplot(df, aes(x = UMAP1, y = UMAP2)) +
+    geom_point(aes(color = counts), show.legend = FALSE, stroke = 0) +
+    scale_color_gradient(low = "gray90", high = "navyblue") +
+    theme_bw() +
+    theme(panel.grid = element_blank()) +
+    ggtitle(gene)
+  return(p)
 }
 
+# - Plot gene on violin -------------------------------------------------------
+violin_gene <- function(gene) {
+  df <- data.frame(counts = mtx[gene, ]) %>% bind_cols(., clusters)
+  p <- ggplot(df, aes(x = cluster, y = counts, fill = cluster)) +
+    scale_y_continuous(expand = c(0, 0)) +
+    labs(y = "Normalized expression", x = element_blank()) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+          panel.grid = element_blank()) +
+    geom_violin(scale = "width", show.legend = FALSE) +
+    geom_jitter(color = "black", stroke = 0, alpha = 0.5,
+                show.legend = FALSE, height = 0, width = 0.2) +
+    ggtitle(gene)
+  return(p)
+}
+
+# - Make markers table --------------------------------------------------------
+keep_markers <- function(clstr, classes) {
+  df <- filter(markers, cluster == clstr) %>% 
+    select(gene, cluster, avg_logFC, pct.1, pct.2, p_val, p_val_adj) %>%
+    mutate_at(vars(starts_with("pct")), ~ round(.x * 100), 0) %>%
+    mutate(avg_logFC = round(avg_logFC, 2)) %>%
+    arrange(p_val_adj) %>%
+    mutate_at(vars(starts_with("p_")), ~ scales::scientific(.x, digits = 2)) %>%
+    rename("Fold change" = avg_logFC, "Pct express" = pct.1,
+           "Pct other" = pct.2, "P" = p_val, "FDR" = p_val_adj)
+  if (!is.null(classes)) {
+    df <- filter(df, gene %in% anno[rowSums(anno[, classes]) > 0, ]$gene)
+  }
+  return(df)
+}
 
 # - Read in data --------------------------------------------------------------
 data_files <- list.files("datasets", ".Rdata", full.names = TRUE)
 data_names <- str_extract(data_files, "(?<=\\/)(.+)(?=\\.Rdata)")
 data_names <- str_replace_all(data_names, "_", " ")
+
+anno <- read_csv("annotation.csv")
+gene_info <- read_csv("biotypes.csv")
+
+# default value
+cluster_list <- "No data loaded"

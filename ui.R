@@ -2,97 +2,50 @@
 library(shiny)
 library(dplyr)
 library(shinythemes)
+library(DT)
 
 # - UI ------------------------------------------------------------------------
 ui <- 
-  navbarPage(title = "Drop-seq data", 
-             theme = shinytheme("flatly"),
-             
-             # - Tab 1: Grab a dataset and view ------------------------------------------
-             tabPanel("Explore data",
-                      fluidPage(
-                        
-                        # HTML tag info
-                        tags$head(
-                          tags$style(HTML("hr {border-top: 1px solid #000000;}"))
-                          ),
-                        
-                        # select dataset
-                        fluidRow(
-                          column(width = 3, 
-                                 selectInput("dataset", 
-                                             "Dataset:", 
-                                             choices = data_names)
-                                 ),
-                          column(width = 3, align = 'left', 
-                                 style = 'margin-top: 25px;',
-                                 actionButton("select_data", "Select", 
-                                              width = "100%")
-                                 )
-                          ),
-                        fluidRow(
-                          column(width = 6,
-                                 plotOutput("umap"))
-                          )
-                      )
-                      ),
-             
-             # - Tab 2 - plotting top markers per cluster -------------------- 
-             tabPanel("Top markers",
-                      fluidPage(
-                        fluidRow(
-                          column(width = 3, 
-                                 selectizeInput("cluster", 
-                                                "Cluster ID",
-                                                choices = cluster_list),
-                                 sliderInput("num_genes", "Number of genes",
-                                             min = 1, max = 16, value = 4)),
-                          column(width = 3,
-                                 selectizeInput("plottype_cluster", 
-                                                "Plot type",
-                                                choices = list("Violin" = "violin",
-                                                               "Boxplot" = "boxplot",
-                                                               "UMAP" = "umap")
-                                 )
-                          ),
-                          column(width = 3, align = 'left', 
-                                 style = 'margin-top: 25px;',
-                                 actionButton("select_cluster", "Select", 
-                                              width = "100%")
+    navbarPage(title = "Drop-seq data", theme = shinytheme("flatly"),
+        # - Tab 1: Grab a dataset and view ------------------------------------
+        tabPanel("Explore",
+            fluidPage(
+                # HTML tag info
+                tags$head(
+                    tags$style(HTML("hr {border-top: 1px solid #000000;}"))
+                    ),
+                # select dataset
+                fluidRow(
+                    column(width = 3, 
+                        selectInput("dataset", "Dataset:", choices = data_names)
+                        ),
+                    column(width = 3, align = 'left', style = 'margin-top: 25px;',
+                        actionButton("select_data", "Select", width = "100%")
+                        ),
+                    column(width = 3, 
+                        selectInput("cluster", "Cluster:", choices = cluster_list)
                         )
-                      ),
-                        
-                        fluidRow(
-                          width = 6,
-                          plotOutput("markers_plot")
-                        )
-                        
-                      )),
-             
-             tabPanel("Browse genes",
-                      fluidPage(
-                        fluidRow(
-                          column(width = 3, 
-                                 selectizeInput("genes", 
-                                                "Genes",
-                                                choices = gene_list,
-                                                multiple = TRUE)),
-                          column(width = 3,
-                                 selectizeInput("plottype_gene", 
-                                                "Plot type",
-                                                choices = list("Violin" = "violin",
-                                                               "Boxplot" = "boxplot",
-                                                               "UMAP" = "umap")
-                                                )
-                                 ),
-                          column(width = 3, align = 'left', 
-                                 style = 'margin-top: 25px;',
-                                 actionButton("select_genes", "Select", 
-                                              width = "100%")
-                        )
-                      ),
-                      fluidRow(
-                        plotOutput("gene_plot")
-                      ))
-             )
+                    ),
+                tags$h4("Plots"),
+                fluidRow(
+                  column(width = 4, plotOutput("clusters")),
+                  column(width = 4, plotOutput("umap")),
+                  column(width = 4, plotOutput("violin"))
+                  ),
+                tags$hr(),
+                tags$h4("Table"),
+                fluidRow(
+                    column(width = 12, 
+                        checkboxGroupInput("classes", "", 
+                                           choices = c("Receptor" = "receptor", 
+                                                       "Secreted" = "secreted", 
+                                                       "Transcription factor" = "transcription-factor"),
+                                           inline = TRUE))
+                ),
+                fluidRow(
+                  column(width = 12, DTOutput("gene_table"))
+                )
+                )
+            ),
+        tabPanel("About")
   )

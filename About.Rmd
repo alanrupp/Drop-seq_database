@@ -1,0 +1,31 @@
+---
+title: "About"
+author: "Alan Rupp"
+date: "`r format(Sys.time(), '%b %d, %Y')`"
+output: html_document
+---
+
+This app allows for the browsing and sorting of Drop-seq data. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Datasets
+* Arc neurons ([Campbell et al. 2017](https://www.nature.com/articles/nn.4495))
+* Hypothalamus neurons ([Chen et al. 2017](https://doi.org/10.1016/j.celrep.2017.03.004))
+* Preoptic neurons ([Moffitt et al. 2018](https://science.sciencemag.org/content/362/6416/eaau5324))
+* LHA neurons ([Mickelsen et al. 2019](https://www.nature.com/articles/s41593-019-0349-8))
+* VMH neurons (Myers lab)
+
+## Usage
+First, select a dataset from the drop-down menu in the upper left and hit Select. A few plots will appear including the clusters mapped onto UMAP space, and 2 plots of a single gene's expression in UMAP space and as a violin plot by cluster. 
+
+To change the gene that is plotted, select a row from the data table at the bottom. The table is filtered by selected cluster from the Cluster drop-down menu and can be further filtered using the checkboxes for different gene classes (Receptor, Secreted, Transcription factor).
+
+For questions email me at `ruppa@med.umich.edu`.
+
+---
+
+## Acknowledgements
+A similar app by BUKT (Novo Nordisk) provided ideas for filtering DT columns and selecting genes to plot based on DT rows instead of a drop-down menu.

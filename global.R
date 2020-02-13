@@ -40,9 +40,7 @@ violin_gene <- function(gene) {
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
           panel.grid = element_blank()) +
-    geom_violin(scale = "width", show.legend = FALSE) +
-    geom_jitter(color = "black", stroke = 0, alpha = 0.5,
-                show.legend = FALSE, height = 0, width = 0.2) +
+    geom_violin(scale = "width", show.legend = FALSE)
     ggtitle(gene)
   return(p)
 }
